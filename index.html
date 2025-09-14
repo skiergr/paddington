@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Paddington Visiting Hours</title>
+  <style>
+    :root { --bg:#0f172a; --panel:#0b1220; --line:#1f2937; --ok:#22c55e; --no:#ef4444; --ink:#e5e7eb; }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{margin:0; background:var(--bg); color:var(--ink); display:grid; place-items:center;}
+    .box{width:100%; max-width:520px; padding:28px; border:1px solid var(--line); border-radius:16px; background:var(--panel); display:grid; gap:18px; place-items:center}
+    button{appearance:none; border:none; cursor:pointer; padding:14px 18px; border-radius:12px; font-weight:800; font-size:1rem; background:linear-gradient(135deg,#22d3ee,#60a5fa); color:#00131a;}
+    #status{font-size:clamp(56px,10vw,96px); font-weight:900; letter-spacing:1px; line-height:1;}
+    .open{color:var(--ok)} .closed{color:var(--no)}
+  </style>
+</head>
+<body>
+  <div class="box">
+    <button id="check">Can I visit Paddington now?</button>
+    <div id="status">—</div>
+  </div>
+
+  <script>
+    // Fixed schedule: 08:00–21:00 Detroit time, daily
+    const ZONE = 'America/Detroit';
+    const OPEN = '08:00';
+    const CLOSE = '20:00';
+
+    const toMin = t => { const [h,m] = t.split(':').map(Number); return h*60+m; };
+    function zonedHM(zone){
+      const now = new Date();
+      const fmt = new Intl.DateTimeFormat('en-US',{ timeZone: zone, hour:'2-digit', minute:'2-digit', hour12:false });
+      const parts = Object.fromEntries(fmt.formatToParts(now).map(p=>[p.type,p.value]));
+      return { h: +parts.hour, m: +parts.minute };
+    }
+    function isOpen(){
+      const {h,m} = zonedHM(ZONE);
+      const now = h*60 + m;
+      return now >= toMin(OPEN) && now < toMin(CLOSE);
+    }
+
+    const btn = document.getElementById('check');
+    const out = document.getElementById('status');
+    function render(){
+      const open = isOpen();
+      out.textContent = open ? 'YES' : 'NO';
+      out.className = open ? 'open' : 'closed';
+    }
+    btn.addEventListener('click', render);
+  </script>
+</body>
+</html>
